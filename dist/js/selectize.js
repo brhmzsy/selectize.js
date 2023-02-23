@@ -497,6 +497,7 @@ var DIACRITICS = {
   'k': '[kƘƙꝀꝁḰḱǨǩḲḳḴḵκϰ₭]',
   'l': '[lŁłĽľĻļĹĺḶḷḸḹḼḽḺḻĿŀȽƚⱠⱡⱢɫɬᶅɭȴʟＬｌ]',
   'n': '[nŃńǸǹŇňÑñṄṅŅņṆṇṊṋṈṉN̈n̈ƝɲȠƞᵰᶇɳȵɴＮｎŊŋ]',
+  'm': '[mṀṁṂṃⱮɱɯ]',
   'o': '[oØøÖöÓóÒòÔôǑǒŐőŎŏȮȯỌọƟɵƠơỎỏŌōÕõǪǫȌȍՕօ]',
   'p': '[pṔṕṖṗⱣᵽƤƥᵱ]',
   'q': '[qꝖꝗʠɊɋꝘꝙq̃]',
@@ -1698,6 +1699,58 @@ $.extend(Selectize.prototype, {
 		var self     = this;
 		var settings = self.settings;
 		var options  = this.getSearchOptions();
+
+    var DIACRITICS = {
+      'a': '[aḀḁĂăÂâǍǎȺⱥȦȧẠạÄäÀàÁáĀāÃãÅåąĄÃąĄ]',
+      'b': '[b␢βΒB฿𐌁ᛒ]',
+      'c': '[cĆćĈĉČčĊċC̄c̄ÇçḈḉȻȼƇƈɕᴄＣｃ]',
+      'd': '[dĎďḊḋḐḑḌḍḒḓḎḏĐđD̦d̦ƉɖƊɗƋƌᵭᶁᶑȡᴅＤｄð]',
+      'e': '[eÉéÈèÊêḘḙĚěĔĕẼẽḚḛẺẻĖėËëĒēȨȩĘęᶒɆɇȄȅẾếỀềỄễỂểḜḝḖḗḔḕȆȇẸẹỆệⱸᴇＥｅɘǝƏƐε]',
+      'f': '[fƑƒḞḟ]',
+      'g': '[gɢ₲ǤǥĜĝĞğĢģƓɠĠġ]',
+      'h': '[hĤĥĦħḨḩẖẖḤḥḢḣɦʰǶƕ]',
+      'i': '[iÍíÌìĬĭÎîǏǐÏïḮḯĨĩĮįĪīỈỉȈȉȊȋỊịḬḭƗɨɨ̆ᵻᶖİiIıɪＩｉ]',
+      'j': '[jȷĴĵɈɉʝɟʲ]',
+      'k': '[kƘƙꝀꝁḰḱǨǩḲḳḴḵκϰ₭]',
+      'l': '[lŁłĽľĻļĹĺḶḷḸḹḼḽḺḻĿŀȽƚⱠⱡⱢɫɬᶅɭȴʟＬｌ]',
+      'n': '[nŃńǸǹŇňÑñṄṅŅņṆṇṊṋṈṉN̈n̈ƝɲȠƞᵰᶇɳȵɴＮｎŊŋ]',
+      'm': '[mṀṁṂṃⱮɱɯ]',
+      'o': '[oØøÖöÓóÒòÔôǑǒŐőŎŏȮȯỌọƟɵƠơỎỏŌōÕõǪǫȌȍՕօ]',
+      'p': '[pṔṕṖṗⱣᵽƤƥᵱ]',
+      'q': '[qꝖꝗʠɊɋꝘꝙq̃]',
+      'r': '[rŔŕɌɍŘřŖŗṘṙȐȑȒȓṚṛⱤɽ]',
+      's': '[sŚśṠṡṢṣꞨꞩŜŝŠšŞşȘșS̈s̈]',
+      't': '[tŤťṪṫŢţṬṭƮʈȚțṰṱṮṯƬƭ]',
+      'u': '[uŬŭɄʉỤụÜüÚúÙùÛûǓǔŰűŬŭƯưỦủŪūŨũŲųȔȕ∪]',
+      'v': '[vṼṽṾṿƲʋꝞꝟⱱʋ]',
+      'w': '[wẂẃẀẁŴŵẄẅẆẇẈẉ]',
+      'x': '[xẌẍẊẋχ]',
+      'y': '[yÝýỲỳŶŷŸÿỸỹẎẏỴỵɎɏƳƴ]',
+      'z': '[zŹźẐẑŽžŻżẒẓẔẕƵƶ]'
+    };
+
+    var asciifold = (function () {
+      var i, n, k, chunk;
+      var i18nChars = '';
+      var lookup = {};
+      for (k in DIACRITICS) {
+        if (DIACRITICS.hasOwnProperty(k)) {
+          chunk = DIACRITICS[k].substring(2, DIACRITICS[k].length - 1);
+          i18nChars += chunk;
+          for (i = 0, n = chunk.length; i < n; i++) {
+            lookup[chunk.charAt(i)] = k;
+          }
+        }
+      }
+      var regexp = new RegExp('[' + i18nChars + ']', 'g');
+      return function (str) {
+        return str.replace(regexp, function (i18nChar) {
+          return lookup[i18nChar];
+        }).toLowerCase();
+      };
+    })();
+    
+    query = asciifold(String(query || ''));
 
 		if (settings.score) {
 			calculateScore = self.settings.score.apply(this, [query]);
